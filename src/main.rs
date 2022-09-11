@@ -1,7 +1,9 @@
 extern crate glium;
 use glium::glutin;
 use glium::Surface;
+use glium::uniform;
 use std::fs;
+use std::time::Instant;
 
 mod init;
 mod vertex;
@@ -29,25 +31,14 @@ fn main() {
     // Compile shaders into program
     let program = glium::Program::from_source(&display, vertex_shader, fragment_shader, None).unwrap();
 
+    // T is uniform to change the position without changing vertexes
+    let mut t: f32 = 0.0;
+
+    let mut time_last_rendered = Instant::now();
+
     // Create the event loop
     // ? move || is gwn een function maken zonder naam, net zoals () => in javascript
     event_loop.run(move |event, _, control_flow| {
-        // Create new secondary frame buffer
-        let mut target = display.draw();
-        target.clear_color(0.5, 0.0, 0.8, 1.0);
-
-        // Draw triangle
-        target.draw(&vertex_buffer, &indices, &program, &glium::uniforms::EmptyUniforms, &Default::default()).unwrap();
-
-        // Switch secondary and primary buffers
-        // ? .unwrap() betekend panic on error, als er potentieel een error is en je doet niet .unwrap() (of soortgelijke functie) dan compiled het niet
-        target.finish().unwrap();
-
-
-        // Set 60 fps
-        let next_frame_time = std::time::Instant::now() + std::time::Duration::from_nanos(1000000000 / 60);
-        *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
-
         // Do action based on event (eg. key input)
         // ? Match is soort van switch statement
         match event {
@@ -60,8 +51,40 @@ fn main() {
                     _ => {},
                 }
             },
+            
             _ => {}
         }
+
+        if Instant::now() - time_last_rendered < std::time::Duration::from_nanos(100000000 / 60) {
+            return;
+        }
+
+        t += 0.002;
+        if t > 0.5 {
+            t = -0.5;
+        }
+
+        // Create new secondary frame buffer
+        let mut target = display.draw();
+        target.clear_color(0.5, 0.0, 0.8, 1.0);
+
+        let uniform = uniform! {
+            matrix: [
+                [ t.cos(),  t.sin(), 0.0, 0.0],
+                [ -t.sin(), t.cos(), 0.0, 0.0],
+                [ 0.0,      0.0,     1.0, 0.0],
+                [ t,        0.0,     0.0, 1.0],
+            ]
+        };
+
+        // Draw triangle
+        target.draw(&vertex_buffer, &indices, &program, &uniform, &Default::default()).unwrap();
+
+        // Switch secondary and primary buffers
+        // ? .unwrap() betekend panic on error, als er potentieel een error is en je doet niet .unwrap() (of soortgelijke functie) dan compiled het niet
+        target.finish().unwrap();
+
+        time_last_rendered = Instant::now();
     });
 
     println!("Hello, world!");
