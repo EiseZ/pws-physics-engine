@@ -1,11 +1,11 @@
-use glium::{glutin, Surface, implement_vertex};
+use glium::{glutin, implement_vertex};
 
 use crate::vertex::Vertex;
 
 // Inits the required things to create a window and event loop
 pub fn init() -> (glutin::event_loop::EventLoop<()>, glium::Display) {
     // Create event loop for events (input, window movement, etc.)
-    let mut event_loop = glutin::event_loop::EventLoop::new();
+    let event_loop = glutin::event_loop::EventLoop::new();
 
     // Window parameters
     let wb = glutin::window::WindowBuilder::new()

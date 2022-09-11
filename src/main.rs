@@ -1,20 +1,21 @@
 extern crate glium;
 use glium::glutin;
-use glium::Surface;
-use glium::uniform;
-use std::fs;
+use quad::Quad;
 use std::time::Instant;
 
 mod init;
 mod vertex;
+mod renderer;
+mod shader;
+mod quad;
 
 use vertex::Vertex;
+use renderer::Renderer;
 
 fn main() {
     let (event_loop, display) = init::init();
 
-    let vertex_shader: &str = &fs::read_to_string("shaders/vs.vert").unwrap()[..];
-    let fragment_shader: &str = &fs::read_to_string("shaders/fs.frag").unwrap()[..];
+    let renderer = Renderer::new(&display);
 
     // Specify vertexes for triangle
     let vertex1 = Vertex { position: [-0.5, -0.5] };
@@ -25,13 +26,18 @@ fn main() {
     // Put shape in vertex buffer
     let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
 
-    // Specify indicices (simple method because online triangle)
-    let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-
     // Compile shaders into program
-    let program = glium::Program::from_source(&display, vertex_shader, fragment_shader, None).unwrap();
+    let program = shader::create_program(display.clone());
 
-    // T is uniform to change the position without changing vertexes
+
+    let quad = Quad::new(&display, &[
+        Vertex { position: [-0.5, -0.5] },
+        Vertex { position: [-1.0,  0.5] },
+        Vertex { position: [ 0.5, -0.5] },
+        Vertex { position: [ 0.5,  0.5] },
+    ]);
+
+
     let mut t: f32 = 0.0;
 
     let mut time_last_rendered = Instant::now();
@@ -64,28 +70,19 @@ fn main() {
             t = -0.5;
         }
 
-        // Create new secondary frame buffer
-        let mut target = display.draw();
-        target.clear_color(0.5, 0.0, 0.8, 1.0);
+        let mut target = renderer.setup_target(&display, 0.0, 0.0, 0.0);
 
-        let uniform = uniform! {
-            matrix: [
-                [ t.cos(),  t.sin(), 0.0, 0.0],
-                [ -t.sin(), t.cos(), 0.0, 0.0],
-                [ 0.0,      0.0,     1.0, 0.0],
-                [ t,        0.0,     0.0, 1.0],
-            ]
-        };
+        let matrix = [
+            [ t.cos(),  t.sin(), 0.0, 0.0],
+            [ -t.sin(), t.cos(), 0.0, 0.0],
+            [ 0.0,      0.0,     1.0, 0.0],
+            [ t,        0.0,     0.0, 1.0],
+        ];
+        //renderer.draw_triangle(&mut target, &program, &vertex_buffer, matrix);
+        renderer.draw_quad(&mut target, &program, &quad, matrix);
 
-        // Draw triangle
-        target.draw(&vertex_buffer, &indices, &program, &uniform, &Default::default()).unwrap();
-
-        // Switch secondary and primary buffers
-        // ? .unwrap() betekend panic on error, als er potentieel een error is en je doet niet .unwrap() (of soortgelijke functie) dan compiled het niet
-        target.finish().unwrap();
+        renderer.finish(target);
 
         time_last_rendered = Instant::now();
     });
-
-    println!("Hello, world!");
 }
