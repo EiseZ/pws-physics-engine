@@ -8,14 +8,19 @@ mod vertex;
 mod renderer;
 mod shader;
 mod quad;
+mod camera;
+mod rect;
 
 use vertex::Vertex;
-use renderer::Renderer;
+use camera::Camera;
+
+const WIDTH: u32 = 800;
+const HEIGTH: u32 = 600;
 
 fn main() {
-    let (event_loop, display) = init::init();
+    let (event_loop, display) = init::init(WIDTH, HEIGTH);
 
-    let renderer = Renderer::new(&display);
+    let camera = Camera::new(&display, WIDTH, HEIGTH, -0.01, 100.0);
 
     // Specify vertexes for triangle
     let vertex1 = Vertex { position: [-0.5, -0.5] };
@@ -32,7 +37,7 @@ fn main() {
 
     let quad = Quad::new(&display, &[
         Vertex { position: [-0.5, -0.5] },
-        Vertex { position: [-1.0,  0.5] },
+        Vertex { position: [-0.5,  0.5] },
         Vertex { position: [ 0.5, -0.5] },
         Vertex { position: [ 0.5,  0.5] },
     ]);
@@ -66,22 +71,22 @@ fn main() {
         }
 
         t += 0.002;
-        if t > 0.5 {
-            t = -0.5;
+        if t > 10.0 {
+            t = -10.0;
         }
 
-        let mut target = renderer.setup_target(&display, 0.0, 0.0, 0.0);
+        let mut target = camera.setup_frame(&display, 0.0, 0.0, 0.0);
 
-        let matrix = [
-            [ t.cos(),  t.sin(), 0.0, 0.0],
-            [ -t.sin(), t.cos(), 0.0, 0.0],
-            [ 0.0,      0.0,     1.0, 0.0],
-            [ t,        0.0,     0.0, 1.0],
+        let matrix = [ // In culumn major (is crappy maar ja)
+            [100.0, 0.0, 0.0, 0.0],
+            [0.0, 100.0, 0.0, 0.0],
+            [0.0, 0.0, 100.0, 0.0],
+            [1.0, 0.0, 0.0, 1.0], // Translation x, y, z
         ];
-        //renderer.draw_triangle(&mut target, &program, &vertex_buffer, matrix);
-        renderer.draw_quad(&mut target, &program, &quad, matrix);
 
-        renderer.finish(target);
+        camera.render_rect(&mut target, &program, &quad, matrix);
+
+        camera.finish(target);
 
         time_last_rendered = Instant::now();
     });

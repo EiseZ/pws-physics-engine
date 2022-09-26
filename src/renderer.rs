@@ -39,10 +39,11 @@ impl Renderer {
         target.draw(vertex_buffer, self.triangle_indices, program, &uniform, &Default::default()).unwrap();
     }
 
-    pub fn draw_quad(&self, target: &mut Frame, program: &Program, quad: &Quad, matrix: [[f32; 4]; 4]) {
+    pub fn draw_quad(&self, target: &mut Frame, program: &Program, quad: &Quad, matrix: [[f32; 4]; 4], perspective: &[[f32; 4]; 4]) {
         // Create uniform
         let uniform = uniform! {
             matrix: matrix,
+            perspective: *perspective,
         };
 
         // Draw quad
