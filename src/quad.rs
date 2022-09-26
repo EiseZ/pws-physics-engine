@@ -1,6 +1,4 @@
 use glium::Display;
-use glium::IndexBuffer;
-
 use glium::VertexBuffer;
 
 use crate::vertex::Vertex;
