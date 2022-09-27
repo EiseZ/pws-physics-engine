@@ -1,6 +1,6 @@
-use std::ops::{Add, AddAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Vector<T> {
     pub x: T,
     pub y: T,
@@ -35,6 +35,28 @@ impl AddAssign for Vector<f32> {
             x: self.x + other.x,
             y: self.y + other.y,
             z: self.z + other.z,
+        }
+    }
+}
+
+impl Mul<f32> for Vector<f32> {
+    type Output = Self;
+
+    fn mul(self, scalar: f32) -> Self {
+        Self {
+            x: self.x * scalar,
+            y: self.y * scalar,
+            z: self.z * scalar,
+        }
+    }
+}
+
+impl MulAssign<f32> for Vector<f32> {
+    fn mul_assign(&mut self, scalar: f32) {
+        *self = Self {
+            x: self.x * scalar,
+            y: self.y * scalar,
+            z: self.z * scalar,
         }
     }
 }

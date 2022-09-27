@@ -12,6 +12,7 @@ mod engine;
 mod phycics_objects;
 mod vector;
 mod matrix;
+mod constants;
 
 use engine::Engine;
 use phycics_objects::{PhysicsObject, PhysicsObjectType};
@@ -25,11 +26,12 @@ fn main() {
 
     let mut engine = Engine::new(&display, WIDTH, HEIGTH, 0.1, 100.0, 45.0);
 
-    let mut rect1 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 0.0), Vector::new(1000.0, 100.0, 1.0), Vector::new(0.0, 0.0, 0.0));
-    let mut rect2 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 1.0), Vector::new(1.0, 1.0, 1.0), Vector::new(0.0, 0.0, 0.0));
+    let mut rect1 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 0.0), Vector::new(100.0, 100.0, 1.0), Vector::new(0.0, 0.0, 0.0), Vector { x: 0.0, y: 0.0, z: 0.0 }, Vector { x: 0.0, y: 0.0, z: 0.0 });
 
     engine.objects.push(rect1);
     // engine.objects.push(rect2);
+
+    const TIMESTEP: f32 = 0.001;
 
     let mut time_last_rendered = Instant::now();
     // Create the event loop
@@ -51,11 +53,16 @@ fn main() {
             _ => {}
         }
 
-        if Instant::now() - time_last_rendered < std::time::Duration::from_nanos(100000000 / 60) {
+        let frame_time = Instant::now() - time_last_rendered;
+        if frame_time.as_secs_f32() < TIMESTEP {
             return;
         }
 
-        engine.objects[0].scale(Vector::new(-1.0, 0.0, 0.0));
+        for object in &mut engine.objects {
+            object.set_acceleration(Vector { x: 0.0, y: -constants::g, z: 0.0 });
+            object.update_all(TIMESTEP);
+        }
+
         engine.render_all(&display);
 
         time_last_rendered = Instant::now();
