@@ -1,6 +1,5 @@
 extern crate glium;
 use glium::glutin;
-use std::rc::Rc;
 use std::time::Instant;
 
 mod init;
@@ -11,9 +10,12 @@ mod quad;
 mod camera;
 mod engine;
 mod phycics_objects;
+mod vector;
+mod matrix;
 
 use engine::Engine;
 use phycics_objects::{PhysicsObject, PhysicsObjectType};
+use vector::Vector;
 
 const WIDTH: u32 = 800;
 const HEIGTH: u32 = 600;
@@ -23,11 +25,11 @@ fn main() {
 
     let mut engine = Engine::new(&display, WIDTH, HEIGTH, 0.01, 100.0);
 
-    let mut rect1 = PhysicsObject::new(PhysicsObjectType::Rect, 0.0, 0.0, 100.0, 100.0, 100.0);
-    let mut rect2 = PhysicsObject::new(PhysicsObjectType::Rect, 0.0, 0.0, 200.0, 100.0, 100.0);
+    let mut rect1 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 0.0), Vector::new(100.0, 100.0, 1.0), Vector::new(0.0, 0.0, 0.0));
+    let mut rect2 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 0.0), Vector::new(100.0, 100.0, 100.0), Vector::new(0.0, 0.0, 0.0));
 
     engine.objects.push(rect1);
-    engine.objects.push(rect2);
+    // engine.objects.push(rect2);
 
     let mut time_last_rendered = Instant::now();
     // Create the event loop
@@ -53,7 +55,7 @@ fn main() {
             return;
         }
 
-        engine.objects[0].translate(0.5, 0.1);
+        engine.objects[0].rotate(Vector { x: 0.01, y: 0.0, z: 0.0 });
         engine.render_all(&display);
 
         time_last_rendered = Instant::now();
