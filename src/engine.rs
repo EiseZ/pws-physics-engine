@@ -16,10 +16,10 @@ pub struct Engine {
 }
 
 impl Engine {
-    pub fn new(display: &Display, width: u32, heigth: u32, near: f32, far: f32) -> Engine {
+    pub fn new(display: &Display, width: u32, heigth: u32, near: f32, far: f32, fov: f32) -> Engine {
         return Engine {
             objects: Vec::new(),
-            camera: Camera::new(display, width, heigth, near, far),
+            camera: Camera::new(display, width, heigth, near, far, fov),
             program: shader::create_program(display.clone()),
             quad: Quad::new(&display, &[
                 Vertex { position: [-0.5, -0.5] },

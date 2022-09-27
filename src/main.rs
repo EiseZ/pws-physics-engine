@@ -23,10 +23,10 @@ const HEIGTH: u32 = 600;
 fn main() {
     let (event_loop, display) = init::init(WIDTH, HEIGTH);
 
-    let mut engine = Engine::new(&display, WIDTH, HEIGTH, 0.01, 100.0);
+    let mut engine = Engine::new(&display, WIDTH, HEIGTH, 0.1, 100.0, 45.0);
 
-    let mut rect1 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 0.0), Vector::new(100.0, 100.0, 1.0), Vector::new(0.0, 0.0, 0.0));
-    let mut rect2 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 0.0), Vector::new(100.0, 100.0, 100.0), Vector::new(0.0, 0.0, 0.0));
+    let mut rect1 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 0.0), Vector::new(1000.0, 100.0, 1.0), Vector::new(0.0, 0.0, 0.0));
+    let mut rect2 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 1.0), Vector::new(1.0, 1.0, 1.0), Vector::new(0.0, 0.0, 0.0));
 
     engine.objects.push(rect1);
     // engine.objects.push(rect2);
@@ -55,7 +55,7 @@ fn main() {
             return;
         }
 
-        engine.objects[0].rotate(Vector { x: 0.01, y: 0.0, z: 0.0 });
+        engine.objects[0].scale(Vector::new(-1.0, 0.0, 0.0));
         engine.render_all(&display);
 
         time_last_rendered = Instant::now();

@@ -7,7 +7,7 @@ use crate::quad::Quad;
 pub struct Renderer {
     // Basic traigle indices
     triangle_indices: NoIndices,
-    quad_indices: IndexBuffer<u32>
+    quad_indices: IndexBuffer<u32>,
 }
 
 impl Renderer {
