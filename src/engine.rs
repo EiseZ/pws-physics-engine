@@ -1,9 +1,9 @@
-use crate::phycics_objects::{PhysicsObject, PhysicsObjectType};
 use crate::camera::Camera;
+use crate::matrix::multiply_matrix;
+use crate::phycics_objects::{PhysicsObject, PhysicsObjectType};
+use crate::quad::Quad;
 use crate::shader;
 use crate::vertex::Vertex;
-use crate::quad::Quad;
-use crate::matrix::multiply_matrix;
 
 use glium::{Display, Program};
 
@@ -16,17 +16,35 @@ pub struct Engine {
 }
 
 impl Engine {
-    pub fn new(display: &Display, width: u32, heigth: u32, near: f32, far: f32, fov: f32) -> Engine {
+    pub fn new(
+        display: &Display,
+        width: u32,
+        heigth: u32,
+        near: f32,
+        far: f32,
+        fov: f32,
+    ) -> Engine {
         return Engine {
             objects: Vec::new(),
             camera: Camera::new(display, width, heigth, near, far, fov),
             program: shader::create_program(display.clone()),
-            quad: Quad::new(&display, &[
-                Vertex { position: [-0.5, -0.5] },
-                Vertex { position: [-0.5,  0.5] },
-                Vertex { position: [ 0.5, -0.5] },
-                Vertex { position: [ 0.5,  0.5] },
-            ]),
+            quad: Quad::new(
+                &display,
+                &[
+                    Vertex {
+                        position: [-0.5, -0.5, 1.0],
+                    },
+                    Vertex {
+                        position: [-0.5, 0.5, 1.0],
+                    },
+                    Vertex {
+                        position: [0.5, -0.5, 1.0],
+                    },
+                    Vertex {
+                        position: [0.5, 0.5, 1.0],
+                    },
+                ],
+            ),
         };
     }
 
@@ -39,22 +57,38 @@ impl Engine {
                     let b = object.rot.y;
                     let c = object.rot.z;
 
-                    // Row major
+                    let rot_matrix = [
+                        [
+                            b.cos() * c.cos(),
+                            a.sin() * b.sin() * c.cos() - a.cos() * c.sin(),
+                            a.sin() * c.sin() - a.cos() * b.sin() * c.cos(),
+                            0.0,
+                        ],
+                        [
+                            -b.cos() * c.sin(),
+                            a.cos() * c.cos() - a.sin() * b.sin() * c.sin(),
+                            a.cos() * b.sin() * c.sin() + a.sin() * c.cos(),
+                            0.0,
+                        ],
+                        [b.sin(), -a.sin() * a.cos(), a.cos() * a.cos(), 0.0],
+                        [0.0, 0.0, 0.0, 1.0],
+                    ];
+
                     let rot_x_mat = [
                         [1.0, 0.0, 0.0, 0.0],
-                        [0.0, a.cos(), -a.sin(), 0.0],
-                        [0.0, a.sin(), a.cos(), 0.0],
+                        [0.0, a.cos(), a.sin(), 0.0],
+                        [0.0, -a.sin(), a.cos(), 0.0],
                         [0.0, 0.0, 0.0, 1.0],
                     ];
                     let rot_y_mat = [
                         [b.cos(), 0.0, b.sin(), 0.0],
                         [0.0, 1.0, 0.0, 0.0],
-                        [0.0, 0.0, 1.0, 0.0],
-                        [-b.sin(), 0.0, b.cos(), 1.0],
+                        [-b.sin(), 0.0, b.cos(), 0.0],
+                        [0.0, 0.0, 0.0, 1.0],
                     ];
                     let rot_z_mat = [
-                        [c.cos(), -c.sin(), 0.0, 0.0],
-                        [c.sin(), c.cos(), 0.0, 0.0],
+                        [c.cos(), c.sin(), 0.0, 0.0],
+                        [-c.sin(), c.cos(), 0.0, 0.0],
                         [0.0, 0.0, 1.0, 0.0],
                         [0.0, 0.0, 0.0, 1.0],
                     ];
@@ -66,11 +100,18 @@ impl Engine {
                         [0.0, 0.0, 0.0, 1.0],
                     ];
 
-                    let matrix = multiply_matrix(&multiply_matrix(&multiply_matrix(&rot_x_mat, &rot_y_mat), &rot_z_mat), &trans_mat);
-                    self.camera.render_rect(&mut target, &self.program, &self.quad, matrix)   
-                },
+                    let matrix = multiply_matrix(
+                        &multiply_matrix(&multiply_matrix(&rot_x_mat, &rot_y_mat), &rot_z_mat),
+                        &trans_mat,
+                    );
 
-                _ => { panic!("Circle") }
+                    self.camera
+                        .render_rect(&mut target, &self.program, &self.quad, matrix)
+                }
+
+                _ => {
+                    panic!("Circle")
+                }
             }
         }
 

@@ -1,8 +1,9 @@
 use glium::IndexBuffer;
-use glium::{Display, Frame, Surface, Program, VertexBuffer, uniform, index::NoIndices};
+use glium::{index::NoIndices, uniform, Display, Frame, Program, Surface, VertexBuffer};
 
-use crate::vertex::Vertex;
+use crate::matrix::multiply_matrix_to_row_major;
 use crate::quad::Quad;
+use crate::vertex::Vertex;
 
 pub struct Renderer {
     // Basic traigle indices
@@ -14,7 +15,12 @@ impl Renderer {
     pub fn new(display: &Display) -> Renderer {
         Renderer {
             triangle_indices: glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList),
-            quad_indices: glium::IndexBuffer::new(display, glium::index::PrimitiveType::TrianglesList, &[0, 1, 2, 2, 1, 3]).unwrap(),
+            quad_indices: glium::IndexBuffer::new(
+                display,
+                glium::index::PrimitiveType::TrianglesList,
+                &[0, 1, 2, 2, 1, 3],
+            )
+            .unwrap(),
         }
     }
 
@@ -29,17 +35,38 @@ impl Renderer {
         target
     }
 
-    pub fn draw_triangle(&self, target: &mut Frame, program: &Program, vertex_buffer: &VertexBuffer<Vertex>, matrix: [[f32; 4]; 4]) {
+    pub fn draw_triangle(
+        &self,
+        target: &mut Frame,
+        program: &Program,
+        vertex_buffer: &VertexBuffer<Vertex>,
+        matrix: [[f32; 4]; 4],
+    ) {
         // Create uniform
         let uniform = uniform! {
             matrix: matrix,
         };
 
         // Draw triangle
-        target.draw(vertex_buffer, self.triangle_indices, program, &uniform, &Default::default()).unwrap();
+        target
+            .draw(
+                vertex_buffer,
+                self.triangle_indices,
+                program,
+                &uniform,
+                &Default::default(),
+            )
+            .unwrap();
     }
 
-    pub fn draw_quad(&self, target: &mut Frame, program: &Program, quad: &Quad, matrix: [[f32; 4]; 4], perspective: &[[f32; 4]; 4]) {
+    pub fn draw_quad(
+        &self,
+        target: &mut Frame,
+        program: &Program,
+        quad: &Quad,
+        matrix: [[f32; 4]; 4],
+        perspective: &[[f32; 4]; 4],
+    ) {
         // Create uniform
         let uniform = uniform! {
             matrix: matrix,
@@ -47,7 +74,15 @@ impl Renderer {
         };
 
         // Draw quad
-        target.draw(&quad.vertex_buffer, &self.quad_indices, program, &uniform, &Default::default()).unwrap();
+        target
+            .draw(
+                &quad.vertex_buffer,
+                &self.quad_indices,
+                program,
+                &uniform,
+                &Default::default(),
+            )
+            .unwrap();
     }
 
     pub fn finish(&self, target: Frame) {

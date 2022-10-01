@@ -1,65 +1,46 @@
-use glium::{Program, Frame, Display};
+use glium::{Display, Frame, Program};
 
 use crate::matrix::{multiply_matrix, multiply_matrix_to_row_major};
-use crate::renderer::Renderer;
 use crate::quad::Quad;
+use crate::renderer::Renderer;
 
 pub struct Camera {
     renderer: Renderer,
-    perspective: [[f32; 4]; 4]
+    perspective: [[f32; 4]; 4],
 }
 
 impl Camera {
-    pub fn new(display: &Display, width: u32, heigth: u32, near: f32, far: f32, fov: f32) -> Camera {
-        let left = -(width as f32);
-        let right = width as f32;
-        let bottom = -(heigth as f32);
-        let top = heigth as f32;
+    pub fn new(
+        display: &Display,
+        width: u32,
+        height: u32,
+        znear: f32,
+        zfar: f32,
+        fov: f32,
+    ) -> Camera {
+        // let left = -(width as f32);
+        // let right = width as f32;
+        // let bottom = -(height as f32);
+        // let top = height as f32;
 
+        let aspect_ratio = width as f32 / height as f32;
 
         let f = 1.0 / (fov / 2.0).tan();
         Camera {
             renderer: Renderer::new(display),
             perspective: [
-                [ 2.0 / (left - right), 0.0,                   0.0,                - (left + right) / (right - left) ],
-                [ 0.0,                  2.0 / (top - bottom),  0.0,                - (top + bottom) / (top - bottom) ],
-                [ 0.0,                  0.0,                  -2.0 / (far - near), - (far + near) / (far - near) ],
-                [ 0.0,                  0.0,                   0.0,                1.0 ],
+                [f / aspect_ratio, 0.0, 0.0, 0.0],
+                [0.0, f, 0.0, 0.0],
+                [0.0, 0.0, (zfar + znear) / (zfar - znear), 1.0],
+                [0.0, 0.0, -(2.0 * zfar * znear) / (zfar - znear), 0.0],
             ],
+            // Orhto
             // perspective: [
-            //     [ 1.0 / right, 0.0, 0.0, 0.0 ],
-            //     [ 0.0, 1.0 / top,  0.0, 0.0 ],
-            //     [ 0.0, 0.0, -2.0 / (far - near), - (far + near) / (far - near) ],
-            //     [ 0.0, 0.0, 0.0, 1.0 ],
+            //     [ 2.0 / (left - right), 0.0,                   0.0,                - (left + right) / (right - left) ],
+            //     [ 0.0,                  2.0 / (top - bottom),  0.0,                - (top + bottom) / (top - bottom) ],
+            //     [ 0.0,                  0.0,                  -2.0 / (far - near), - (far + near) / (far - near) ],
+            //     [ 0.0,                  0.0,                   0.0,                1.0 ],
             // ],
-            // perspective: [
-            //     [ near / right, 0.0, 0.0, 0.0 ],
-            //     [ 0.0, near / top, 0.0, 0.0 ],
-            //     [ 0.0, 0.0, -(far + near) / (far - near), -(2.0 * far * near) / (far - near)],
-            //     [ 0.0, 0.0, -1.0, 0.0 ],
-            // ],
-            // perspective: [
-            //     [ f * (heigth as f32 / width as f32), 0.0, 0.0, 0.0 ],
-            //     [ 0.0, f, 0.0, 0.0 ],
-            //     [ 0.0, 0.0, (far + near) / (far - near), 1.0 ],
-            //     [ 0.0, 0.0, -(2.0 * far * near) / (far - near), 0.0],
-            // ],
-            // perspective: multiply_matrix(
-            //      Ortho:
-            //     &[
-            //         [ 2.0 / (left - right), 0.0,                   0.0,                - (left + right) / (right - left) ],
-            //         [ 0.0,                  2.0 / (top - bottom),  0.0,                - (top + bottom) / (top - bottom) ],
-            //         [ 0.0,                  0.0,                  -2.0 / (far - near), - (far + near) / (far - near) ],
-            //         [ 0.0,                  0.0,                   0.0,                1.0 ],
-            //     ],
-            //      Perspective:
-            //     &[
-            //         [ near, 0.0, 0.0, 0.0 ],
-            //         [ 0.0, near, 0.0, 0.0 ],
-            //         [ 0.0, 0.0, far + near, -far * near ],
-            //         [ 0.0, 0.0, 1.0, 0.0 ],
-            //     ]
-            // ),
         }
     }
 
@@ -67,8 +48,15 @@ impl Camera {
         self.renderer.setup_target(&display, r, g, b)
     }
 
-    pub fn render_rect(&self, target: &mut Frame, program: &Program, quad: &Quad, matrix: [[f32; 4]; 4]) {
-        self.renderer.draw_quad(target, program, quad, matrix, &self.perspective);
+    pub fn render_rect(
+        &self,
+        target: &mut Frame,
+        program: &Program,
+        quad: &Quad,
+        matrix: [[f32; 4]; 4],
+    ) {
+        self.renderer
+            .draw_quad(target, program, quad, matrix, &self.perspective);
     }
 
     pub fn finish(&self, target: Frame) {

@@ -2,17 +2,17 @@ extern crate glium;
 use glium::glutin;
 use std::time::Instant;
 
+mod camera;
+mod constants;
+mod engine;
 mod init;
-mod vertex;
+mod matrix;
+mod phycics_objects;
+mod quad;
 mod renderer;
 mod shader;
-mod quad;
-mod camera;
-mod engine;
-mod phycics_objects;
 mod vector;
-mod matrix;
-mod constants;
+mod vertex;
 
 use engine::Engine;
 use phycics_objects::{PhysicsObject, PhysicsObjectType};
@@ -24,12 +24,26 @@ const HEIGTH: u32 = 600;
 fn main() {
     let (event_loop, display) = init::init(WIDTH, HEIGTH);
 
-    let mut engine = Engine::new(&display, WIDTH, HEIGTH, 0.1, 100.0, 45.0);
+    let mut engine = Engine::new(&display, WIDTH, HEIGTH, 0.1, 100.0, 3.14159 / 2.0);
 
-    let mut rect1 = PhysicsObject::new(PhysicsObjectType::Rect, Vector::new(0.0, 0.0, 0.0), Vector::new(100.0, 100.0, 1.0), Vector::new(0.0, 0.0, 0.0), Vector { x: 0.0, y: 0.0, z: 0.0 }, Vector { x: 0.0, y: 0.0, z: 0.0 });
+    let mut rect1 = PhysicsObject::new(
+        PhysicsObjectType::Rect,
+        Vector::new(0.0, 0.0, 0.0),
+        Vector::new(10.0, 10.0, 10.0),
+        Vector::new(0.0, 0.0, 0.0),
+        Vector {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        },
+        Vector {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        },
+    );
 
     engine.objects.push(rect1);
-    // engine.objects.push(rect2);
 
     const TIMESTEP: f32 = 0.001;
 
@@ -40,16 +54,17 @@ fn main() {
         // Do action based on event (eg. key input)
         // ? Match is soort van switch statement
         match event {
-            glutin::event::Event::WindowEvent { event: window_event, .. } => {
-                match window_event {
-                    glutin::event::WindowEvent::CloseRequested => {
-                        *control_flow = glutin::event_loop::ControlFlow::Exit;
-                        return;
-                    },
-                    _ => {},
+            glutin::event::Event::WindowEvent {
+                event: window_event,
+                ..
+            } => match window_event {
+                glutin::event::WindowEvent::CloseRequested => {
+                    *control_flow = glutin::event_loop::ControlFlow::Exit;
+                    return;
                 }
+                _ => {}
             },
-            
+
             _ => {}
         }
 
@@ -59,7 +74,16 @@ fn main() {
         }
 
         for object in &mut engine.objects {
-            object.set_acceleration(Vector { x: 0.0, y: -constants::g, z: 0.0 });
+            // object.set_acceleration(Vector {
+            //     x: 0.0,
+            //     y: -constants::g,
+            //     z: 0.0,
+            // });
+            object.rotate(Vector {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            });
             object.update_all(TIMESTEP);
         }
 
