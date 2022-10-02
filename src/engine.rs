@@ -32,16 +32,16 @@ impl Engine {
                 &display,
                 &[
                     Vertex {
-                        position: [-0.5, -0.5, 1.0],
+                        position: [-1.0, -1.0, 0.0],
                     },
                     Vertex {
-                        position: [-0.5, 0.5, 1.0],
+                        position: [-1.0, 1.0, 0.0],
                     },
                     Vertex {
-                        position: [0.5, -0.5, 1.0],
+                        position: [1.0, -1.0, 0.0],
                     },
                     Vertex {
-                        position: [0.5, 0.5, 1.0],
+                        position: [1.0, 1.0, 0.0],
                     },
                 ],
             ),
@@ -57,7 +57,7 @@ impl Engine {
                     let b = object.rot.y;
                     let c = object.rot.z;
 
-                    let rot_matrix = [
+                    let rot_mat = [
                         [
                             b.cos() * c.cos(),
                             a.sin() * b.sin() * c.cos() - a.cos() * c.sin(),
@@ -94,10 +94,17 @@ impl Engine {
                     ];
 
                     let trans_mat = [
-                        [object.scale.x, 0.0, 0.0, object.pos.x],
-                        [0.0, object.scale.y, 0.0, object.pos.y],
-                        [0.0, 0.0, object.scale.z, object.pos.z],
-                        [0.0, 0.0, 0.0, 1.0],
+                        [object.scale.x, 0.0, 0.0, 0.0],
+                        [0.0, object.scale.y, 0.0, 0.0],
+                        [0.0, 0.0, object.scale.z, 0.0],
+                        [object.pos.x, object.pos.y, object.pos.z, 1.0],
+                    ];
+
+                    let rev_mat = [
+                        [1.0, 0.0, 0.0, 0.0],
+                        [0.0, 1.0, 0.0, 0.0],
+                        [0.0, 0.0, 1.0, 0.0],
+                        [-object.pos.x, -object.pos.y, -object.pos.z, 1.0],
                     ];
 
                     let matrix = multiply_matrix(

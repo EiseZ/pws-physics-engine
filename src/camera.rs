@@ -1,8 +1,9 @@
 use glium::{Display, Frame, Program};
 
-use crate::matrix::{multiply_matrix, multiply_matrix_to_row_major};
+use crate::matrix::{multiply_mat_vec, multiply_matrix, multiply_matrix_to_row_major};
 use crate::quad::Quad;
 use crate::renderer::Renderer;
+use crate::Vector;
 
 pub struct Camera {
     renderer: Renderer,
@@ -31,8 +32,8 @@ impl Camera {
             perspective: [
                 [f / aspect_ratio, 0.0, 0.0, 0.0],
                 [0.0, f, 0.0, 0.0],
-                [0.0, 0.0, (zfar + znear) / (zfar - znear), 1.0],
-                [0.0, 0.0, -(2.0 * zfar * znear) / (zfar - znear), 0.0],
+                [0.0, 0.0, zfar / (zfar - znear), 1.0],
+                [0.0, 0.0, (-zfar * znear) / (zfar - znear), 0.0],
             ],
             // Orhto
             // perspective: [

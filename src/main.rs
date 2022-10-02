@@ -24,11 +24,11 @@ const HEIGTH: u32 = 600;
 fn main() {
     let (event_loop, display) = init::init(WIDTH, HEIGTH);
 
-    let mut engine = Engine::new(&display, WIDTH, HEIGTH, 0.1, 100.0, 3.14159 / 2.0);
+    let mut engine = Engine::new(&display, WIDTH, HEIGTH, 0.1, 100.0, 1.6);
 
     let mut rect1 = PhysicsObject::new(
         PhysicsObjectType::Rect,
-        Vector::new(0.0, 0.0, 0.0),
+        Vector::new(0.0, 0.0, 50.0),
         Vector::new(10.0, 10.0, 10.0),
         Vector::new(0.0, 0.0, 0.0),
         Vector {
@@ -80,9 +80,9 @@ fn main() {
             //     z: 0.0,
             // });
             object.rotate(Vector {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
+                x: 0.003,
+                y: 0.001,
+                z: 0.002,
             });
             object.update_all(TIMESTEP);
         }
